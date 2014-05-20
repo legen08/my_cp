@@ -9,6 +9,9 @@
 #include<limits.h>
 
 int cp_file_file(char* from, char* to) {
+	if (!strcmp(from, to)) {
+		return;
+	}
 	int fd1 = open(from, O_RDONLY);
 	if (fd1 == -1) {
 		perror("Ошибка открытия на чтение");
@@ -109,6 +112,10 @@ void walk(char* path_from, char* path_to, char rec) {
 
 void cp_dir_dir(char* path_from, char* path_to, char rec) {
 	if (rec == 0) return;
+	if (!strcmp(path_from, path_to)) {
+		printf("невозможно скопировать каталог в самого себя\n");
+		return;
+	}
 	struct stat stbuf_from;
 	if (stat(path_from, &stbuf_from) == -1) 
 		fprintf(stderr, "can't access %s\n", path_from);
@@ -136,9 +143,11 @@ void cp_start(char* path_from, char* path_to, char rec) {
 		fprintf(stderr, "can't access %s\n", path_from);
 	if (stat(path_to, &stbuf_to) == -1) {
 		int fd = open(path_to, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-		if (fd == -1) 
+		if (fd == -1) { 
 			perror("Ошибка открытия на запись");
-		close(fd);
+		    close(fd);
+		}
+		stat(path_to, &stbuf_to);
 		//fprintf(stderr, "can't access %s\n", path_to);
 	}
 	if ((stbuf_from.st_mode & S_IFREG) && (stbuf_to.st_mode & S_IFREG)) 
